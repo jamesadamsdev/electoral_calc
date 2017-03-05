@@ -102,9 +102,17 @@ def _verify_calculate_data(data):
     
 
 def _dhondt(total_votes, number_of_seats, threshold, party_votes):
+    """
+    Here's how the D'Hondt method works: 
+    for each party, take the number of votes, and create a list of numbers, starting with the original number,
+    then that number divided by 2, then 3, all the way until it's divided by the number of available seats.
+    For those n seats, find the highest n numbers throughout the parties' lists, giving that party a seat 
+    if a number comes from their list.
+    """
     
+    # Create a list of { "PartyName":"<name>", "DividedVotes":votes }
     vote_list = []
-
+    
     for party in party_votes:
         party_name = party["PartyName"]
         votes = party["Votes"]
@@ -116,8 +124,11 @@ def _dhondt(total_votes, number_of_seats, threshold, party_votes):
             for i in range(0, number_of_seats):
                 vote_list.append({"PartyName": party_name, "DividedVotes": votes / (initial_divisor + i)})
     
+    # Sort the divided vote list by DividedVotes descending and take the top number_of_seat elements
     vote_list = sorted(vote_list, key=itemgetter('DividedVotes'), reverse=True)[:number_of_seats] 
     
+    # Generate the response by counting how many times each party is on the list of highest DividedVotes,
+    # then adding UnassignedSeats, if any
     c = Counter([p["PartyName"] for p in vote_list])
     
     res = {"PartySeats":[],"UnassignedSeats":0}

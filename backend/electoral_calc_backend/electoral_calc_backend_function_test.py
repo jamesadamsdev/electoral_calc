@@ -20,6 +20,7 @@ def main():
         }
     ])))
         
+    # Taken from the wikipedia article on the D'Hondt method
     print(_dhondt(230000, 8, 0, ([
         {
         	"PartyName":"A",
