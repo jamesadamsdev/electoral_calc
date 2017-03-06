@@ -36,7 +36,7 @@ Provide this json in request:
     "CountMethod": <one of """ + str(list(config.keys())).replace("[", "").replace("]","") + """>,
     "TotalVotes": <int>,
     "NumberOfSeats": <int>,
-    ["Threshold":<int>,]
+    <<<Optional>>>"Threshold":<int>,
     "PartyVotes": 
     [
         {
@@ -108,6 +108,51 @@ def _dhondt(total_votes, number_of_seats, threshold, party_votes):
     then that number divided by 2, then 3, all the way until it's divided by the number of available seats.
     For those n seats, find the highest n numbers throughout the parties' lists, giving that party a seat 
     if a number comes from their list.
+    
+    Since a couple other methods use similar systems, the actual implementation is in the _highest_averages function below.
+    """
+    return _highest_averages(total_votes, number_of_seats, threshold, party_votes, 1, 1)
+
+
+def _sainte_lague(total_votes, number_of_seats, threshold, party_votes):
+    """
+    Similar to the D'Hondt method, but divides by 1, 3, 7... instead.
+    """
+    return _highest_averages(total_votes, number_of_seats, threshold, party_votes, 1, 2)
+
+def _imperiali(total_votes, number_of_seats, threshold, party_votes):
+    """
+    Similar to the D'Hondt method, but divides by 2, 3, 4... instead.
+    """
+    return _highest_averages(total_votes, number_of_seats, threshold, party_votes, 2, 1)
+
+# TODO: Figure out how to handle tied values
+def _highest_averages(total_votes, number_of_seats, threshold, party_votes, initial_divisor, increment):
+    """
+    Runs the highest averages formula.
+    
+    Args:
+    total_votes: How many votes were cast.
+    number_of_seats: How many seats to be allocated.
+    threshold: Parties that didn't get more than threshold % aren't counted.
+    party votes: 
+    [
+        {
+            "PartyName":"<Party1>",
+            "Votes": <int>
+        },
+        {
+            "PartyName":"<Party2>",
+            "Votes": <int>
+        },
+        ...
+        {
+            "PartyName":"<PartyN>",
+            "Votes": <int>
+        },
+    ]
+    initial_divisor: Start at this number when calculating each parties' divided vote list
+    increment: Increment by this number each time when calculating each parties' divided vote list
     """
     
     # Create a list of { "PartyName":"<name>", "DividedVotes":votes }
@@ -119,10 +164,9 @@ def _dhondt(total_votes, number_of_seats, threshold, party_votes):
         
         # Ensure party got enough votes, according to the threshold
         if(votes > (threshold / 100) * total_votes):
-            initial_divisor = 1
             
             for i in range(0, number_of_seats):
-                vote_list.append({"PartyName": party_name, "DividedVotes": votes / (initial_divisor + i)})
+                vote_list.append({"PartyName": party_name, "DividedVotes": votes / (initial_divisor + (increment * i))})
     
     # Sort the divided vote list by DividedVotes descending and take the top number_of_seat elements
     vote_list = sorted(vote_list, key=itemgetter('DividedVotes'), reverse=True)[:number_of_seats] 
