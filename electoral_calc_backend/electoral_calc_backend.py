@@ -126,7 +126,7 @@ def _imperiali(total_votes, number_of_seats, threshold, party_votes):
     """
     return _highest_averages(total_votes, number_of_seats, threshold, party_votes, 2, 1)
 
-# TODO: Figure out how to handle tied values
+
 def _highest_averages(total_votes, number_of_seats, threshold, party_votes, initial_divisor, increment):
     """
     Runs the highest averages formula.
@@ -169,7 +169,8 @@ def _highest_averages(total_votes, number_of_seats, threshold, party_votes, init
                 vote_list.append({"PartyName": party_name, "DividedVotes": votes / (initial_divisor + (increment * i))})
     
     # Sort the divided vote list by DividedVotes descending and take the top number_of_seat elements
-    vote_list = sorted(vote_list, key=itemgetter('DividedVotes'), reverse=True)[:number_of_seats] 
+    vote_list = sorted(vote_list, 
+            key=lambda v: (v['DividedVotes'], total_votes - [pv['Votes'] for pv in party_votes if pv['PartyName'] == v['PartyName']][0]), reverse=True)[:number_of_seats] 
     
     # Generate the response by counting how many times each party is on the list of highest DividedVotes,
     # then adding UnassignedSeats, if any
