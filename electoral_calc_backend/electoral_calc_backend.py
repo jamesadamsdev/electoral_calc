@@ -116,7 +116,7 @@ def _dhondt(total_votes, number_of_seats, threshold, party_votes):
 
 def _sainte_lague(total_votes, number_of_seats, threshold, party_votes):
     """
-    Similar to the D'Hondt method, but divides by 1, 3, 7... instead.
+    Similar to the D'Hondt method, but divides by 1, 3, 5... instead.
     """
     return _highest_averages(total_votes, number_of_seats, threshold, party_votes, 1, 2)
 
